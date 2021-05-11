@@ -1,0 +1,228 @@
+<script
+    src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js">
+</script>
+<script>
+var data_array = [];
+var intervalId;
+var autorefresh = 'no';
+//   var userid = "";
+//  $(function() {
+//    google.script.run.withSuccessHandler(onSuccess).uuid();
+//  });
+//   function onSuccess(data_array1){
+//     console.log (data_array1)
+//     document.getElementById("box1").value = data_array1[0][2];
+//          data_array = data_array1;
+//          $('#loadingMask').fadeOut();
+//   }
+//  $( "input[type=text]" ).change(function() {
+//    google.script.run.addtosheet(this.value);
+//    console.log(this.value)
+//  });
+
+</script>
+<!-- Script used for Login to check if a valid employee is accessing the site -->
+<script type="text/javascript">
+  function dofirst() {
+    $('#sessionOutButton').css('visibility', 'hidden');
+    console.log("in dofirst");
+    $("#empIDSubmit").click(function(){
+      $('.alertmessage').css('visibility', 'hidden');
+      $('.mspinner').css('visibility', 'visible');
+      $('#empIDSubmit').prop('disabled', true);
+      $('#empid').prop('disabled', true);
+      saveID();
+    });
+    document.getElementById("empIDSubmit").addEventListener("click", function(event){
+    event.preventDefault()
+    });    
+    $("#sessionOutButton").click(function(){
+    sessionStorage.removeItem("empID");
+    $('#allData').css('display', 'none');
+    $('.empId').css('display', 'block');
+    autorefresh = 'no';
+    clearall();
+  });
+
+  $("#textarea0402").change(function(){
+    console.log("changed");
+    console.log(this.value);
+  });
+
+  }
+
+  function saveID() {
+    console.log("in saveid")
+    var empid = document.getElementById("empid").value;
+    sessionStorage.setItem("empID", empid);
+    google.script.run.withSuccessHandler(onSvalidateuser).validateuser(empid);
+  }
+
+  window.addEventListener("load", dofirst, false);
+ 
+</script>
+<script>
+  function onSvalidateuser(yesno){ 
+    console.log("in validate user response is " + yesno);
+    var empid = document.getElementById("empid").value;
+    console.log(empid);
+    if ( yesno == 'yes'){
+          console.log(yesno);
+          $('.alertmessage').css('color', 'green');
+          $('.alertmessage').text('Verified.. Loading data...');
+          $('.alertmessage').css('visibility', 'visible');
+      google.script.run.withSuccessHandler(onSgetsheetdata).getsheetdata(empid);
+
+    }
+    else {
+       $('.alertmessage').css('color', 'red');
+      $('.alertmessage').css('visibility', 'visible');
+      $('.alertmessage').text('Access Not Allowed!!!');
+      $('.mspinner').css('visibility', 'hidden')
+      $('#empIDSubmit').prop('disabled', false);
+      $('#empid').prop('disabled', false);
+
+    }
+  }
+  function onSgetsheetdata(data_array1){
+    data_array = data_array1;
+    $('.alertmessage').css('visibility', 'hidden');
+    $('.mspinner').css('visibility', 'hidden')
+    $('.empId').css('display', 'none');
+    $('#sessionOutButton').css('visibility', 'visible');
+//    $('.Tr0001').clone().appendTo( '.Tbody0001');
+//     $('.Tr0001').clone().appendTo( '.Tbody0001');
+//     $("textarea.tcol3").val("hello");
+//     $("#tr0").find("textarea.tcol2").val( "hello 12345");
+     console.log($("textarea.tcol3").val())
+    for (var i= 0 ; i < (data_array.length - 1) ; i = i +1){
+        $('#tr0')
+          .clone()
+          .attr('id', 'tr'+ (i+1))
+          .appendTo("#tbody0");
+        
+    }
+    for (var i= 0 ; i <= (data_array.length - 1) ; i = i +1){
+      $("#tr"+ i).find(".tcol0").attr('id',   'textarea' + f1(i) + '00');
+      $("#tr"+ i).find("textarea.tcol1").attr('id',   'textarea' + f1(i) + '01');
+      $("#tr"+ i).find("textarea.tcol2").attr('id',   'textarea' + f1(i) + '02');
+      $("#tr"+ i).find("textarea.tcol3").attr('id',   'textarea' + f1(i) + '03');
+      $("#tr"+ i).find("textarea.tcol4").attr('id',   'textarea' + f1(i) + '04');
+    }
+    for (var i= 0 ; i <= (data_array.length - 1) ; i = i +1){
+//      $("#textarea"+ i.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + "00").text(data_array[i][0]);
+      $("#textarea"+ f1(i) + "00").text(data_array[i][0]);
+      $("#textarea"+ f1(i) + "01").val(data_array[i][1]);
+      $("#textarea"+ f1(i) + "02").val(data_array[i][2]);
+      $("#textarea"+ f1(i) + "03").val(data_array[i][3]);
+      $("#textarea"+ f1(i) + "04").val(data_array[i][4]);
+//      $("#tr"+ i).find("textarea.tcol4").val(data_array[i][4]);
+      console.log('value' + i + data_array[i][5]);
+      if (data_array[i][5] == 'Y'){
+//        $("#tr"+ i).find("textarea.tcol4").prop('disabled', false)
+        $("#textarea"+ f1(i) + "01").prop('disabled', false)
+        $("#textarea"+ f1(i) + "02").prop('disabled', false)
+        $("#textarea"+ f1(i) + "03").prop('disabled', false)
+        $("#textarea"+ f1(i) + "04").prop('disabled', false)
+        
+      }
+      if (data_array[i][5] == 'N'){
+        $("#textarea"+ f1(i) + "01").prop('disabled', true)
+        $("#textarea"+ f1(i) + "02").prop('disabled', true)
+        $("#textarea"+ f1(i) + "03").prop('disabled', true)
+        $("#textarea"+ f1(i) + "04").prop('disabled', true)
+      }
+    }
+   $('#allData').css('display', 'block');
+   $('.navbar-brand').attr("href", "javascript:refreshvalues();"); 
+   $(".boxresize").change(function(e){
+    var rnum = Number(e.target.id.split("_")[1]);
+    var cnum = Number(e.target.id.split("_")[2]);
+    var t = $("#"+e.target.id).val();
+    var parm = [rnum , cnum ,t];
+    console.log("calling add the sheet" );
+    console.log(parm);
+    google.script.run.withSuccessHandler(onSaddtosheet).addtosheet(parm);
+  });
+  autorefresh = 'yes'
+  intervalId = window.setInterval(function(){
+    refreshvalues();
+  console.log("lloping at every 5 sec - p1")
+  }, 15000);
+//  clearInterval(intervalId) ;
+    console.log(data_array);
+    console.log("onSgetsheetdata");
+    console.log($("textarea.tcol3").val())
+  }
+
+
+function f1(i){
+  return ('_' + i.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false}) + '_')
+}
+
+
+
+  
+document.addEventListener( 'visibilitychange' , function() {
+    if (document.hidden) {
+      clearInterval(intervalId);
+        console.log('bye');
+    } else {
+      if (autorefresh == 'yes'){
+        refreshvalues();
+       intervalId = window.setInterval(function(){
+         refreshvalues();
+     console.log("lloping at every 5 sec")
+    }, 15000);}
+        console.log('well back' + 'autorefresh=' + autorefresh);
+    }
+}, false );
+
+function clearall(){
+   for (var i= 1 ; i <= (data_array.length - 1) ; i = i +1){
+        $('#tr' + i).remove();
+        console.log("removed items");
+        clearInterval(intervalId);
+        $('#empIDSubmit').prop('disabled', false);
+        $('#empid').prop('disabled', false);
+        $('#sessionOutButton').css('visibility', 'hidden');
+
+    }
+}
+
+function refreshvalues(){
+  console.log("calling refresh value");
+  var empid = document.getElementById("empid").value;
+  google.script.run.withSuccessHandler(onSgetsheetdata_refresh).getsheetdata(empid);
+
+}
+
+function onSgetsheetdata_refresh(data_array1){
+   for (var i = 0 ; i <=data_array.length - 1 ; i = i +1){
+     for (var j=0 ; j <=5 ; j = j +1 ){
+       if (data_array[i][j] != data_array1 [i][j]){
+         var tid = "textarea"+ f1(i) + f1(j).slice(1, -1);
+         console.log(tid)
+         $("#"+ tid).val(data_array1 [i][j]);
+         console.log("element not matched" + i + j)
+       }       
+     }
+   } 
+
+   data_array = data_array1 ;
+
+}
+
+function onSaddtosheet(){
+// added hhere remove from here    
+  var x = document.getElementById("snackbar");
+
+  // Add the "show" class to DIV
+  x.className = "show";
+
+  // After 3 seconds, remove the show class from DIV
+  setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+// end here 
+}
+</script>
+<!-- ***END****Script used for Login to check if a valid employee is accessing the site -->
